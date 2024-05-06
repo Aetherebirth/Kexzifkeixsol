@@ -1,7 +1,9 @@
 extends Node
 
 var PlayerIDs = {
-	"ninjdai": "UwU"
+	"ninjdai": {
+		"Password": "UwU"
+	}
 }
 
 # Called when the node enters the scene tree for the first time.
