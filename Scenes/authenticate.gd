@@ -22,6 +22,7 @@ func _ready() -> void:
 
 @rpc("any_peer", "call_remote", "reliable")
 func AuthenticatePlayer(username, password, player_id):
+	var token
 	print("authentication request recelved")
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var result
@@ -35,11 +36,17 @@ func AuthenticatePlayer(username, password, player_id):
 	else:
 		print("Succesful authentication")
 		result = true
+		
+		token = str(randi()).sha256_text() + str(int(Time.get_unix_time_from_system())) 
+		print(token)
+		var gameserver = "GameServer1"
+		ServerHub.DistributeLoginToken(token, gameserver)
+		
 	print("authentication result send to gateway server")
-	rpc_id(gateway_id, "AuthenticationResults", result, player_id)
+	rpc_id(gateway_id, "AuthenticationResults", result, player_id, token)
 
 @rpc("any_peer", "call_remote",  "reliable")
-func AuthenticationResults(result, player_id):
+func AuthenticationResults(result, player_id, token):
 	pass
 
 func parse_cmdline_args() -> Dictionary:
