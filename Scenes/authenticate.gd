@@ -23,7 +23,7 @@ func _ready() -> void:
 @rpc("any_peer", "call_remote", "reliable")
 func AuthenticatePlayer(username, password, player_id):
 	var token
-	print("authentication request recelved")
+	print("authentication request received")
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var result
 	print("Starting authentication")
@@ -44,6 +44,28 @@ func AuthenticatePlayer(username, password, player_id):
 		
 	print("authentication result send to gateway server")
 	rpc_id(gateway_id, "AuthenticationResults", result, player_id, token)
+
+@rpc("any_peer", "call_remote", "reliable")
+func CreateAccount(username, password, player_id):
+	var token
+	print("Account creation request received")
+	var gateway_id = multiplayer.get_remote_sender_id()
+	var message = 1
+	print("Starting authentication")
+	if PlayerData.PlayerIDs.has(username):
+		print("Username already taken")
+		message = 2
+	else:
+		PlayerData.PlayerIDs[username] = {
+			"Password": password
+		}
+		message = 3
+	CreateAccountResults(gateway_id, player_id, message)
+	print("Account creation results sent to gateway server")
+
+@rpc("any_peer", "call_remote",  "reliable")
+func CreateAccountResults(gateway_id, player_id, message):
+	CreateAccountResults.rpc_id(gateway_id, player_id, message)
 
 @rpc("any_peer", "call_remote",  "reliable")
 func AuthenticationResults(result, player_id, token):
