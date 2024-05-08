@@ -12,6 +12,8 @@ static var is_peer_connected: bool
 @export var use_localhost_in_editor: bool
 
 var peer
+var bcrypt_cs = load("res://BCryptWrapper.cs")
+var bcrypt = bcrypt_cs.new()
 
 func _ready() -> void:
 	var args = parse_cmdline_args()
@@ -30,7 +32,7 @@ func AuthenticatePlayer(username, password, player_id):
 	if not PlayerData.PlayerIDs.has(username):
 		print("User not recognized")
 		result = false
-	elif not PlayerData.PlayerIDs[username].Password == password:
+	elif not bcrypt.EnhancedVerifyPassword(password, PlayerData.PlayerIDs[username].Password):
 		print("Incorrect password")
 		result = false
 	else:
@@ -57,7 +59,7 @@ func CreateAccount(username, password, player_id):
 		message = 2
 	else:
 		PlayerData.PlayerIDs[username] = {
-			"Password": password
+			"Password": bcrypt.EnhancedHashPassword(password)
 		}
 		message = 3
 	CreateAccountResults(gateway_id, player_id, message)
