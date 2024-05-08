@@ -24,6 +24,10 @@ ServerHub="*res://Scenes/singletons/server_hub.gd"
 
 project/assembly_name="Kexzifkeixsol"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/godot-sqlite/plugin.cfg")
+
 [rendering]
 
 renderer/rendering_method="mobile"

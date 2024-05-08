@@ -29,10 +29,12 @@ func AuthenticatePlayer(username, password, player_id):
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var result
 	print("Starting authentication")
-	if not PlayerData.PlayerIDs.has(username):
+	
+	var user = PlayerData.get_user_by_name(username)
+	if not user:
 		print("User not recognized")
 		result = false
-	elif not bcrypt.EnhancedVerifyPassword(password, PlayerData.PlayerIDs[username].Password):
+	elif not bcrypt.EnhancedVerifyPassword(password, user.password):
 		print("Incorrect password")
 		result = false
 	else:
@@ -54,13 +56,11 @@ func CreateAccount(username, password, player_id):
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var message = 1
 	print("Starting authentication")
-	if PlayerData.PlayerIDs.has(username):
+	if PlayerData.get_user_by_name(username):
 		print("Username already taken")
 		message = 2
 	else:
-		PlayerData.PlayerIDs[username] = {
-			"Password": bcrypt.EnhancedHashPassword(password)
-		}
+		PlayerData.create_user(username, bcrypt.EnhancedHashPassword(password))
 		message = 3
 	CreateAccountResults(gateway_id, player_id, message)
 	print("Account creation results sent to gateway server")
