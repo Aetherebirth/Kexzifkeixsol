@@ -25,8 +25,8 @@ func LaunchServer() -> void:
 	get_tree().set_multiplayer(hub_api, hub.get_path())
 	hub_api.multiplayer_peer = network
 	
-	network.peer_connected.connect(peer_connected)
-	network.peer_disconnected.connect(peer_disconnected)
+	network.peer_connected.connect(gameserver_connected)
+	network.peer_disconnected.connect(gameserver_disconnected)
 
 @rpc("any_peer", "reliable")
 func DistributeLoginToken(token, gameserver):
@@ -35,11 +35,11 @@ func DistributeLoginToken(token, gameserver):
 
 
 
-func peer_connected(id: int) -> void:
+func gameserver_connected(id: int) -> void:
 	print("Gameserver " + str(id) + " connected to Hub")
 	gameserverlist["GameServer1"] = id
 	print(gameserverlist)
 	
-func peer_disconnected(id: int) -> void:
+func gameserver_disconnected(id: int) -> void:
 	print("Gameserver " + str(id) + " disconnected from Hub")
 	
