@@ -40,11 +40,12 @@ func AuthenticatePlayer(username, password, player_id):
 	else:
 		print("Succesful authentication")
 		result = true
+		var player_data = PlayerData.get_user_common_data(username)
 		
 		token = str(randi()).sha256_text() + str(int(Time.get_unix_time_from_system())) 
 		print(token)
 		var gameserver = "GameServer1"
-		ServerHub.DistributeLoginToken(token, gameserver)
+		ServerHub.DistributeLoginToken(gameserver, token, player_data)
 		
 	print("authentication result send to gateway server")
 	rpc_id(gateway_id, "AuthenticationResults", result, player_id, token)

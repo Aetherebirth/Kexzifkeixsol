@@ -29,9 +29,9 @@ func LaunchServer() -> void:
 	network.peer_disconnected.connect(gameserver_disconnected)
 
 @rpc("any_peer", "reliable")
-func DistributeLoginToken(token, gameserver):
+func DistributeLoginToken(gameserver, token, player_data):
 	print("Sending token to " + gameserver)
-	DistributeLoginToken.rpc_id(gameserverlist[gameserver], token)
+	DistributeLoginToken.rpc_id(gameserverlist[gameserver], token, player_data)
 
 
 
