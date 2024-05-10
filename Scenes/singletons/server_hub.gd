@@ -33,8 +33,6 @@ func DistributeLoginToken(gameserver, token, player_data):
 	print("Sending token to " + gameserver)
 	DistributeLoginToken.rpc_id(gameserverlist[gameserver], token, player_data)
 
-
-
 func gameserver_connected(id: int) -> void:
 	print("Gameserver " + str(id) + " connected to Hub")
 	gameserverlist["GameServer1"] = id
@@ -42,4 +40,22 @@ func gameserver_connected(id: int) -> void:
 	
 func gameserver_disconnected(id: int) -> void:
 	print("Gameserver " + str(id) + " disconnected from Hub")
-	
+
+
+## Global chat system
+@rpc("any_peer", "call_remote", "reliable")
+func BroadcastChatMessage(username: String, escaped_message: String, tab: String):
+	print(username, escaped_message, tab)
+	match tab:
+		"global":
+			SendGlobalChatMessage(username, escaped_message)
+		"guild":
+			SendGuildChatMessage(username, escaped_message, PlayerData.get_player_guild_id(username))
+
+@rpc("authority", "call_remote", "reliable")
+func SendGlobalChatMessage(username: String, escaped_message: String):
+	SendGlobalChatMessage.rpc_id(0, username, escaped_message)
+
+@rpc("authority", "call_remote", "reliable")
+func SendGuildChatMessage(username: String, escaped_message: String, guild: int):
+	SendGuildChatMessage.rpc_id(0, username, escaped_message, guild)
