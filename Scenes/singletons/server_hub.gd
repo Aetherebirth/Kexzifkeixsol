@@ -44,18 +44,18 @@ func gameserver_disconnected(id: int) -> void:
 
 ## Global chat system
 @rpc("any_peer", "call_remote", "reliable")
-func BroadcastChatMessage(username: String, escaped_message: String, tab: String):
-	print(username, escaped_message, tab)
+func BroadcastChatMessage(name: String, escaped_message: String, tab: String):
+	print(name, escaped_message, tab)
 	match tab:
 		"global":
-			SendGlobalChatMessage(username, escaped_message)
+			SendGlobalChatMessage(name, escaped_message)
 		"guild":
-			SendGuildChatMessage(username, escaped_message, PlayerData.get_player_guild_id(username))
+			SendGuildChatMessage(name, escaped_message, PlayerData.get_player_guild_id(name))
 
 @rpc("authority", "call_remote", "reliable")
-func SendGlobalChatMessage(username: String, escaped_message: String):
-	SendGlobalChatMessage.rpc_id(0, username, escaped_message)
+func SendGlobalChatMessage(name: String, escaped_message: String):
+	SendGlobalChatMessage.rpc_id(0, name, escaped_message)
 
 @rpc("authority", "call_remote", "reliable")
-func SendGuildChatMessage(username: String, escaped_message: String, guild: int):
-	SendGuildChatMessage.rpc_id(0, username, escaped_message, guild)
+func SendGuildChatMessage(name: String, escaped_message: String, guild: int):
+	SendGuildChatMessage.rpc_id(0, name, escaped_message, guild)

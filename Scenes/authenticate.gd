@@ -23,14 +23,14 @@ func _ready() -> void:
 	disconnected.connect(disconnect_all)
 
 @rpc("any_peer", "call_remote", "reliable")
-func AuthenticatePlayer(username, password, player_id):
+func AuthenticatePlayer(name, password, player_id):
 	var token
 	print("authentication request received")
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var result
 	print("Starting authentication")
 	
-	var user = PlayerData.get_user_by_name(username)
+	var user = PlayerData.get_user_by_name(name)
 	if not user:
 		print("User not recognized")
 		result = false
@@ -40,7 +40,7 @@ func AuthenticatePlayer(username, password, player_id):
 	else:
 		print("Succesful authentication")
 		result = true
-		var player_data = PlayerData.get_user_common_data(username)
+		var player_data = PlayerData.get_user_common_data(name)
 		
 		token = str(randi()).sha256_text() + str(int(Time.get_unix_time_from_system())) 
 		print(token)
@@ -51,17 +51,17 @@ func AuthenticatePlayer(username, password, player_id):
 	rpc_id(gateway_id, "AuthenticationResults", result, player_id, token)
 
 @rpc("any_peer", "call_remote", "reliable")
-func CreateAccount(username, password, player_id):
+func CreateAccount(name, password, player_id):
 	var token
 	print("Account creation request received")
 	var gateway_id = multiplayer.get_remote_sender_id()
 	var message = 1
 	print("Starting authentication")
-	if PlayerData.get_user_by_name(username):
-		print("Username already taken")
+	if PlayerData.get_user_by_name(name):
+		print("Name already taken")
 		message = 2
 	else:
-		PlayerData.create_user(username, bcrypt.EnhancedHashPassword(password))
+		PlayerData.create_user(name, bcrypt.EnhancedHashPassword(password))
 		message = 3
 	CreateAccountResults(gateway_id, player_id, message)
 	print("Account creation results sent to gateway server")
