@@ -11,51 +11,49 @@ static var is_peer_connected: bool
 @export var default_ip: String = "127.0.0.1"
 @export var use_localhost_in_editor: bool
 
-var peer
-var bcrypt_cs = load("res://BCryptWrapper.cs")
-var bcrypt = bcrypt_cs.new()
+var peer: ENetMultiplayerPeer
 
 func _ready() -> void:
-	var args = parse_cmdline_args()
+	var args: Dictionary = parse_cmdline_args()
 	start_server(args)
-	connected.connect(func(): Connection.is_peer_connected = true)
-	disconnected.connect(func(): Connection.is_peer_connected = false)
+	connected.connect(func() -> void: Connection.is_peer_connected = true)
+	disconnected.connect(func() -> void: Connection.is_peer_connected = false)
 	disconnected.connect(disconnect_all)
 
 @rpc("any_peer", "call_remote", "reliable")
-func AuthenticatePlayer(name, password, player_id):
-	var token
+func AuthenticatePlayer(name: String, password: String, player_id: int) -> void:
+	var token: String
 	print("authentication request received")
-	var gateway_id = multiplayer.get_remote_sender_id()
-	var result
+	var gateway_id: int = multiplayer.get_remote_sender_id()
+	var result: bool
 	print("Starting authentication")
 	
-	var user = PlayerData.get_user_by_name(name)
-	if not user:
+	var user: Dictionary = PlayerData.get_user_by_name(name)
+	if user.id < 0:
 		print("User not recognized")
 		result = false
-	elif not bcrypt.EnhancedVerifyPassword(password, user.password):
+	elif not BCryptWrapper.new().EnhancedVerifyPassword(password, user.password as String):
 		print("Incorrect password")
 		result = false
 	else:
 		print("Succesful authentication")
 		result = true
-		var player_data = PlayerData.get_user_common_data(name)
+		var player_data: Dictionary = PlayerData.get_user_common_data(name)
 		
 		token = str(randi()).sha256_text() + str(int(Time.get_unix_time_from_system())) 
 		print(token)
-		var gameserver = "GameServer1"
+		var gameserver: String = "GameServer1"
 		ServerHub.DistributeLoginToken(gameserver, token, player_data)
 		
 	print("authentication result send to gateway server")
-	rpc_id(gateway_id, "AuthenticationResults", result, player_id, token)
+	AuthenticationResults(gateway_id, result, player_id, token)
 
 @rpc("any_peer", "call_remote", "reliable")
-func CreateAccount(name, password, player_id):
-	var token
+func CreateAccount(name: String, password: String, player_id: int) -> void:
+	var token: String
 	print("Account creation request received")
-	var gateway_id = multiplayer.get_remote_sender_id()
-	var message = 1
+	var gateway_id: int = multiplayer.get_remote_sender_id()
+	var message: int = 1
 	print("Starting authentication")
 	if PlayerData.get_user_by_name(name):
 		print("Name already taken")
@@ -67,16 +65,16 @@ func CreateAccount(name, password, player_id):
 	print("Account creation results sent to gateway server")
 
 @rpc("any_peer", "call_remote",  "reliable")
-func CreateAccountResults(gateway_id, player_id, message):
+func CreateAccountResults(gateway_id: int, player_id: int, message: int) -> void:
 	CreateAccountResults.rpc_id(gateway_id, player_id, message)
 
 @rpc("any_peer", "call_remote",  "reliable")
-func AuthenticationResults(result, player_id, token):
-	pass
+func AuthenticationResults(gateway_id: int, result: int, player_id: int, token: String) -> void:
+	AuthenticationResults.rpc_id(gateway_id, result, player_id, token)
 
 func parse_cmdline_args() -> Dictionary:
-	var cmdline_args = OS.get_cmdline_args()
-	var args = {}
+	var cmdline_args: PackedStringArray = OS.get_cmdline_args()
+	var args: Dictionary = {}
 	
 	var i: int = 0
 	while(i<len(cmdline_args)):
