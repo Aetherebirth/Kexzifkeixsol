@@ -32,7 +32,7 @@ func AuthenticatePlayer(name: String, password: String, player_id: int) -> void:
 	if user.id < 0:
 		print("User not recognized")
 		result = false
-	elif not BCryptWrapper.new().EnhancedVerifyPassword(password, user.password as String):
+	elif not ServerHub.BCryptManager.EnhancedVerifyPassword(password, user.password as String):
 		print("Incorrect password")
 		result = false
 	else:
@@ -59,7 +59,7 @@ func CreateAccount(name: String, password: String, player_id: int) -> void:
 		print("Name already taken")
 		message = 2
 	else:
-		PlayerData.create_user(name, bcrypt.EnhancedHashPassword(password))
+		PlayerData.create_user(name, ServerHub.BCryptManager.EnhancedHashPassword(password))
 		message = 3
 	CreateAccountResults(gateway_id, player_id, message)
 	print("Account creation results sent to gateway server")
@@ -91,7 +91,7 @@ func start_server(args: Dictionary) -> void:
 		max_servers = 5
 	
 	peer = ENetMultiplayerPeer.new()
-	var err = peer.create_server(args.port, max_servers)
+	var err: int = peer.create_server(args.port as int, max_servers)
 	if err != OK:
 		print("Cannot start authentication server. Err: " + str(err))
 		disconnected.emit()

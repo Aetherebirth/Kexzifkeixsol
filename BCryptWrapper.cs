@@ -2,7 +2,7 @@ using Godot;
 using BCrypt;
 
 [GlobalClass]
-public static partial class BCryptWrapper: Node
+public partial class BCryptWrapper : Node
 {
 	public static string HashPassword(string password)
 	{
